@@ -1,4 +1,5 @@
-from flask import Flask, request, render_template_string, url_for
+from flask import Flask, request, render_template_string, url_for, jsonify
+from flask_cors import CORS
 from openai import OpenAI
 import base64
 import json
@@ -12,6 +13,7 @@ api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 
 app = Flask(__name__)
+CORS(app)
 
 # CSV Load
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -315,6 +317,38 @@ def index():
 
     return render_template_string(HTML, result_html=result_html)
 
+
+# JSON API for React frontend
+@app.route("/api/analyze", methods=["POST"])
+def api_analyze():
+    file = request.files.get("image")
+    
+    if not file or file.filename == "":
+        return jsonify({"success": False, "error": "No file uploaded"}), 400
+    
+    ingredient_names = analyze_image(file)
+    
+    if not ingredient_names:
+        return jsonify({"success": False, "error": "Could not read ingredients"}), 400
+    
+    all_ingredients = []
+    concern_ingredients = []
+    
+    for name in ingredient_names:
+        info = lookup_ingredient(name)
+        all_ingredients.append(info)
+        
+        if info['Concern'] and info['Concern'].strip().lower() != "none":
+            concern_ingredients.append(info)
+    
+    return jsonify({
+        "success": True,
+        "allIngredients": all_ingredients,
+        "concernIngredients": concern_ingredients,
+        "hasConcerns": len(concern_ingredients) > 0,
+        "totalCount": len(all_ingredients),
+        "concernCount": len(concern_ingredients)
+    })
 
 # RUN
 if __name__ == "__main__":
