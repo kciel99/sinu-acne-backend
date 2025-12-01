@@ -180,8 +180,8 @@ HTML = """
     }
 
     table { width:100%; border-collapse:collapse; margin-top:10px; }
-    th { background:var(--accent-yellow); padding:8px; text-align:left; font-size:13px; }
-    td { padding:8px; border-bottom:1px solid #eee; font-size:13px; }
+    th { background:var(--accent-yellow); padding:8px; text-align:left; font-size:13px; line-height:1.35; vertical-align: top; }
+    td { padding:8px; border-bottom:1px solid #eee; font-size:13px;line-height:1.35; vertical-align: top;}
 
     .again-wrap { text-align:center; margin-top:20px; }
     .upload-again {
